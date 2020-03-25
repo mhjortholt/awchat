@@ -1,10 +1,42 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
 <head>
-	<title>AW chat test</title>
-	<meta charset="utf-8">
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+
+
+    <title>AW-chatten online</title>
+
+    <link rel="stylesheet" href="css/main.css"/>
+
 </head>
+
 <body>
-	<h1>Hellow orld!</h1>
+
+<div id="container">
+
+    <h1>AW chatten 2020 edition</h1>
+
+    <div id="console"></div>
+
+    <video id="video1" playsinline autoplay muted></video>
+    <video id="video2" playsinline autoplay></video>
+    <video id="video3" playsinline autoplay></video>
+
+    <div>
+        <button id="startButton">Start</button>
+        <button id="callButton">Call</button>
+        <button id="hangupButton">Hang Up</button>
+    </div>
+
+</div>
+
+<!--<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>-->
+<script src="js/main.js" async></script>
+
+
 </body>
 </html>
