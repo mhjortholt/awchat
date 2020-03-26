@@ -19,7 +19,7 @@ app.use(express.json())
 app.post(
   '/api/addme',
   (req, res) => {
-  	db.push(req.body)
+  	db[req.body.user] = req.body
   	res.json(req.body)
   }
 )
