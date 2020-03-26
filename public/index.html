@@ -1,42 +1,112 @@
 <!DOCTYPE html>
 <html>
-<head>
-
+  <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
-    <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
-    <meta name="mobile-web-app-capable" content="yes">
+    <title></title>
+  </head>
+  <body>
+
+    <label>Your ID:</label><br/>
+    <textarea id="yourId"></textarea><br/>
+    <label>Other ID:</label><br/>
+    <textarea id="otherId"></textarea>
+    <button id="connect">connect</button><br/>
+
+    <label>Enter Message:</label><br/>
+    <textarea id="yourMessage"></textarea>
+    <button id="send">send</button>
+    <pre id="messages"></pre>
+
+    <script src="js/jquery.js" charset="utf-8"></script>
+    <script src="js/simple-peer.min.js" charset="utf-8"></script>
+    <script>
+
+    function uuidv4() {
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+    var id = uuidv4();
+
+    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    .then(function(stream) {
+
+        var peer = new SimplePeer({
+          initiator: location.hash === '#init',
+          trickle: false,
+          stream: stream
+        })
+
+        peer.on('signal', function (data) {
+          document.getElementById('yourId').value = JSON.stringify(data)
+
+          var p = {
+            id: id,
+            data: data,
+            user: location.hash === '#init' ? 0 : 1
+          };
+
+          $.ajax({
+            url: '/api/addme',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(p),
+            success: function(response){
+              console.log(response);
+            }
+          })
+        })
+
+        document.getElementById('connect').addEventListener('click', function () {
+          
+          $.ajax({
+            url: '/api/get',
+            type: 'GET',
+            contentType: 'application/json',
+            success: function(response){
+              console.log(response)
+              var data = response[location.hash === '#init' ? 1 : 0].data;
+              document.getElementById('otherId').value = JSON.stringify(data);
+
+              var otherId = data
+              peer.signal(otherId)
+
+            }
+          })
+
+        })
+
+        document.getElementById('send').addEventListener('click', function () {
+          var yourMessage = document.getElementById('yourMessage').value
+          peer.send(yourMessage)
+        })
+
+        peer.on('data', function (data) {
+          document.getElementById('messages').textContent += data + '\n'
+        })
+
+        peer.on('stream', function (stream) {
+          var video = document.createElement('video')
+          document.body.appendChild(video)
+
+          if ('srcObject' in video) {
+            video.srcObject = stream
+          } else {
+            video.src = window.URL.createObjectURL(stream) // for older browsers
+          }
+
+          video.play()
+        })
+
+    })
+    .catch(function(err) {
+      /* handle the error */
+      console.error(err)
+    });
 
 
-    <title>AW-chatten online</title>
 
-    <link rel="stylesheet" href="css/main.css"/>
-
-</head>
-
-<body>
-
-<div id="container">
-
-    <h1>AW chatten 2020 edition</h1>
-
-    <div id="console"></div>
-
-    <video id="video1" playsinline autoplay muted></video>
-    <video id="video2" playsinline autoplay></video>
-    <video id="video3" playsinline autoplay></video>
-
-    <div>
-        <button id="startButton">Start</button>
-        <button id="callButton">Call</button>
-        <button id="hangupButton">Hang Up</button>
-    </div>
-
-</div>
-
-<!--<script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>-->
-<script src="js/main.js" async></script>
-
-
-</body>
+    </script>
+  </body>
 </html>

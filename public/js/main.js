@@ -1,17 +1,10 @@
-/*
- *  Copyright (c) 2015 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-
 'use strict';
 
 const startButton = document.getElementById('startButton');
 const callButton = document.getElementById('callButton');
 const hangupButton = document.getElementById('hangupButton');
 const consolos = document.getElementById('console');
+const h2 = document.getElementById('h2');
 callButton.disabled = true;
 hangupButton.disabled = true;
 startButton.onclick = start;
@@ -41,6 +34,7 @@ function gotStream(stream) {
   video1.srcObject = stream;
   window.localStream = stream;
   callButton.disabled = false;
+  h2.innerHTML = stream.id;
 }
 
 function start() {
@@ -74,6 +68,11 @@ function call() {
   pc1Remote.ontrack = gotRemoteStream1;
   pc1Local.onicecandidate = iceCallback1Local;
   pc1Remote.onicecandidate = iceCallback1Remote;
+
+  log(pc1Local);
+  log(pc1Remote);
+  log('bye');
+  return; 
   log('pc1: created local and remote peer connection objects');
 
   pc2Local = new RTCPeerConnection(servers);

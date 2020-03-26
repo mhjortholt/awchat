@@ -1,0 +1,132 @@
+<html>
+  <body>
+    <style>
+      #outgoing {
+        width: 600px;
+        word-wrap: break-word;
+        white-space: normal;
+      }
+    </style>
+    <form>
+      <textarea id="incoming"></textarea>
+      <button type="submit">submit</button>
+    </form>
+    <pre id="outgoing"></pre>
+
+    <video></video>
+
+<button id="start_video" onclick="start_video()">Start Video</button>
+
+    <script src="js/simple-peer.min.js"></script>
+    <script>
+
+
+      var peer1 = new SimplePeer({
+        initiator: location.hash === '#1',
+        trickle: false
+      })
+
+
+      peer1.on('error', err => console.log('error', err))
+
+      peer1.on('signal', data => {
+        console.log('SIGNAL', JSON.stringify(data))
+        document.querySelector('#outgoing').textContent = JSON.stringify(data)
+      })
+
+      document.querySelector('form').addEventListener('submit', ev => {
+        ev.preventDefault()
+        peer1.signal(JSON.parse(document.querySelector('#incoming').value))
+      })
+
+      peer1.on('connect', () => {
+        console.log('CONNECT')
+        peer1.send((location.hash === '#1' ? 'Hello Slave' : 'Hello master'))
+      })
+
+      peer1.on('data', data => {
+        console.log('data: ' + data)
+      })
+/*
+        var peer2 = new SimplePeer()
+
+        peer1.on('signal', data => {
+          peer2.signal(data)
+        })
+
+        peer2.on('signal', data => {
+          peer1.signal(data)
+        })
+*/
+        peer1.on('stream', stream => {
+          // got remote video stream, now let's show it in a video tag
+          var video = document.querySelector('video')
+
+          if ('srcObject' in video) {
+            video.srcObject = stream
+          } else {
+            video.src = window.URL.createObjectURL(stream) // for older browsers
+          }
+
+          video.play()
+        })
+
+        function addMedia (stream) {
+          peer1.addStream(stream) // <- add streams to peer dynamically
+        }
+
+
+        function start_video() {
+            // then, anytime later...
+            navigator.getUserMedia({ video: true, audio: true }, addMedia, () => {})
+        }
+
+    </script>
+  </body>
+</html>
+
+<!--<!DOCTYPE html>
+<html>
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, user-scalable=yes, initial-scale=1, maximum-scale=1">
+    <meta itemprop="image" content="../../../images/webrtc-icon-192x192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+
+
+    <title>AW-chatten online</title>
+
+
+</head>
+
+<body>
+
+<div id="container">
+
+    <h1>AW chatten 2020 edition</h1>
+
+    <h2 id="h2"></h2>
+
+    <video id="video1" playsinline autoplay muted></video>
+    <video id="video2" playsinline autoplay></video>
+    <video id="video3" playsinline autoplay></video>
+
+    <div>
+        <button id="startButton">Start</button>
+        <button id="callButton">Call</button>
+        <button id="hangupButton">Hang Up</button>
+    </div>
+
+</div>
+
+
+<script src="js/main.js" async></script>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+
+
+<div id="console"></div>
+
+</body>
+</html>
+-->
