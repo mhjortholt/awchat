@@ -15,7 +15,8 @@
     <label>Enter Message:</label><br/>
     <textarea id="yourMessage"></textarea>
     <button id="send">send</button>
-    <pre id="messages"></pre>
+    <pre id="messages"></pre><br />
+    <button id="play">PLAY</button><br/>
 
     <script src="js/jquery.js" charset="utf-8"></script>
     <script src="js/simple-peer.min.js" charset="utf-8"></script>
@@ -100,11 +101,16 @@
           video.play()
         })
 
+        document.getElementById('play').addEventListener('click', function () {
+          video.play()
+        })
+
     })
     .catch(function(err) {
       /* handle the error */
       console.error(err)
     });
+
 
 
 
