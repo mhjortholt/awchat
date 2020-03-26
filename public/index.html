@@ -17,6 +17,7 @@
     <button id="send">send</button>
     <pre id="messages"></pre><br />
     <button id="play">PLAY</button><br/>
+    <video id="video" playsinline autoplay></video>
 
     <script src="js/jquery.js" charset="utf-8"></script>
     <script src="js/simple-peer.min.js" charset="utf-8"></script>
@@ -30,8 +31,7 @@
     }
     var id = uuidv4();
 
-    var video = document.createElement('video')
-    document.body.appendChild(video);
+    var video = document.getElementById('video');
 
     navigator.mediaDevices.getUserMedia({video: { facingMode: "user" }, audio: true})
     .then(function(stream) {
