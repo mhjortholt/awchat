@@ -29,7 +29,10 @@
     }
     var id = uuidv4();
 
-    navigator.mediaDevices.getUserMedia({video: true, audio: true})
+    var video = document.createElement('video')
+    document.body.appendChild(video);
+
+    navigator.mediaDevices.getUserMedia({video: { facingMode: "user" }, audio: true})
     .then(function(stream) {
 
         var peer = new SimplePeer({
@@ -87,8 +90,6 @@
         })
 
         peer.on('stream', function (stream) {
-          var video = document.createElement('video')
-          document.body.appendChild(video)
 
           if ('srcObject' in video) {
             video.srcObject = stream
