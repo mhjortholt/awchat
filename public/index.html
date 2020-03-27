@@ -6,22 +6,25 @@
   </head>
   <body>
 
-    <label>Your ID:</label><br/>
-    <textarea id="yourId"></textarea><br/>
-    <label>Other ID:</label><br/>
-    <textarea id="otherId"></textarea>
-    <button id="connect">connect</button><br/>
-
+    <button id="connect" style="display: none">connect</button><br/>
+    <h1>loading...</h1>
+<!--
     <label>Enter Message:</label><br/>
     <textarea id="yourMessage"></textarea>
     <button id="send">send</button>
     <pre id="messages"></pre><br />
     <button id="play">PLAY</button><br/>
+-->
     <video id="video" playsinline autoplay></video>
 
     <script src="js/jquery.js" charset="utf-8"></script>
     <script src="js/simple-peer.min.js" charset="utf-8"></script>
     <script>
+
+    var initiator = location.hash === '#init';
+    if(initiator) {
+      $('#connect').show();
+    }
 
     function uuidv4() {
       return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -37,13 +40,13 @@
     .then(function(stream) {
 
         var peer = new SimplePeer({
-          initiator: location.hash === '#init',
+          initiator: initiator,
           trickle: false,
           stream: stream
         })
 
         peer.on('signal', function (data) {
-          document.getElementById('yourId').value = JSON.stringify(data)
+          //sdocument.getElementById('yourId').value = JSON.stringify(data)
 
           var p = {
             id: id,
@@ -58,29 +61,32 @@
             data: JSON.stringify(p),
             success: function(response){
               console.log(response);
+              
             }
           })
         })
 
         document.getElementById('connect').addEventListener('click', function () {
-          
+          connect();
+        });
+
+        function connect() {
           $.ajax({
             url: '/api/get',
             type: 'GET',
             contentType: 'application/json',
             success: function(response){
               console.log(response)
-              var data = response[location.hash === '#init' ? 1 : 0].data;
-              document.getElementById('otherId').value = JSON.stringify(data);
+              var data = response[initiator ? 1 : 0].data;
+              //document.getElementById('otherId').value = JSON.stringify(data);
 
               var otherId = data
               peer.signal(otherId)
 
             }
           })
-
-        })
-
+        }
+/*
         document.getElementById('send').addEventListener('click', function () {
           var yourMessage = document.getElementById('yourMessage').value
           peer.send(yourMessage)
@@ -89,7 +95,7 @@
         peer.on('data', function (data) {
           document.getElementById('messages').textContent += data + '\n'
         })
-
+*/
         peer.on('stream', function (stream) {
 
           if ('srcObject' in video) {
@@ -101,9 +107,7 @@
           video.play()
         })
 
-        document.getElementById('play').addEventListener('click', function () {
-          video.play()
-        })
+        if(!initiator) connect();
 
     })
     .catch(function(err) {
