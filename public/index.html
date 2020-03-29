@@ -2,121 +2,38 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title></title>
+    <title>AW-chat</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Baloo+2:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
   <body>
 
-    <button id="connect" style="display: none">connect</button><br/>
-    <h1>loading...</h1>
-<!--
-    <label>Enter Message:</label><br/>
-    <textarea id="yourMessage"></textarea>
-    <button id="send">send</button>
-    <pre id="messages"></pre><br />
-    <button id="play">PLAY</button><br/>
--->
-    <video id="video" playsinline autoplay></video>
+    <div class="main-box">
+      <h1>AW-CHAT</h1>
+      <p>
+        Welcome to AW-chat, the best place on the Internet to meet your friends, family or colleagues during these difficult times. Click the button below to get started.
+      </p>
+
+      <div id="create-box" style="margin-top: 30px;">
+
+        <input id="room-name" type="text" placeholder="Name of chat (optional)"/><br />
+
+        <button onclick="create()">Create chat</button>
+      </div>
+
+    </div>
 
     <script src="js/jquery.js" charset="utf-8"></script>
-    <script src="js/simple-peer.min.js" charset="utf-8"></script>
+    <script src="js/tools.js" charset="utf-8"></script>
     <script>
 
-    var initiator = location.hash === '#init';
-    if(initiator) {
-      $('#connect').show();
-    }
-
-    function uuidv4() {
-      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-        return v.toString(16);
-      });
-    }
-    var id = uuidv4();
-
-    var video = document.getElementById('video');
-
-    navigator.mediaDevices.getUserMedia({video: { facingMode: "user" }, audio: true})
-    .then(function(stream) {
-
-        var peer = new SimplePeer({
-          initiator: initiator,
-          trickle: false,
-          stream: stream
-        })
-
-        peer.on('signal', function (data) {
-          //sdocument.getElementById('yourId').value = JSON.stringify(data)
-
-          var p = {
-            id: id,
-            data: data,
-            user: location.hash === '#init' ? 0 : 1
-          };
-
-          $.ajax({
-            url: '/api/addme',
-            type: 'POST',
-            contentType: 'application/json',
-            data: JSON.stringify(p),
-            success: function(response){
-              console.log(response);
-              
-            }
-          })
-        })
-
-        document.getElementById('connect').addEventListener('click', function () {
-          connect();
+      function create() {
+        let name = $('#room-name').val();
+        post('/api/create', {name: name}, function(resp) {
+          window.location = '/chat#' + resp.id;
         });
-
-        function connect() {
-          $.ajax({
-            url: '/api/get',
-            type: 'GET',
-            contentType: 'application/json',
-            success: function(response){
-              console.log(response)
-              var data = response[initiator ? 1 : 0].data;
-              //document.getElementById('otherId').value = JSON.stringify(data);
-
-              var otherId = data
-              peer.signal(otherId)
-
-            }
-          })
-        }
-/*
-        document.getElementById('send').addEventListener('click', function () {
-          var yourMessage = document.getElementById('yourMessage').value
-          peer.send(yourMessage)
-        })
-
-        peer.on('data', function (data) {
-          document.getElementById('messages').textContent += data + '\n'
-        })
-*/
-        peer.on('stream', function (stream) {
-
-          if ('srcObject' in video) {
-            video.srcObject = stream
-          } else {
-            video.src = window.URL.createObjectURL(stream) // for older browsers
-          }
-
-          video.play()
-        })
-
-        if(!initiator) connect();
-
-    })
-    .catch(function(err) {
-      /* handle the error */
-      console.error(err)
-    });
-
-
-
+      }
 
     </script>
   </body>

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>AW-chat</title>
+
+    <link href="https://fonts.googleapis.com/css?family=Baloo+2:400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../css/style.css">
+  </head>
+  <body>
+
+    <div onclick="goToStart()" id="home">
+      🍺
+    </div>
+
+  	<div class="main-box" id="start-screen">
+  		
+  		<h1 id="header"></h1>
+      
+      <div id="room-info" style="display: none;">  		
+        <video id="mirror" playsinline autoplay style="width: 400px; height: 250px; background: url('../img/noise.gif');"></video>
+
+    		<p>
+    			Currently there are <span id="users" style="font-weight: bold;">0</span> people in the chat
+    		</p>
+
+    		<button id="join-btn" onclick="join()" disabled="disabled">Join</button>
+      </div>
+
+      <button id="home-btn" onclick="goToStart()" style="display: none;">Go to start</button>
+  	</div>
+
+    <div id="videos">
+      <video id="selfie" playsinline autoplay class="video"></video>
+    </div>
+
+    <script src="../js/jquery.js" charset="utf-8"></script>
+    <script src="../js/simple-peer.min.js" charset="utf-8"></script>
+    <script src="../js/tools.js" charset="utf-8"></script>
+    <script>
+      let room_id = location.hash.substring(1);
+      var mirror = document.getElementById('mirror');
+      var selfie = document.getElementById('selfie');
+      var connections = [];
+      var myStream, poller;
+
+      // 1. Get chatroom
+      get('/api/get?id=' + room_id, function(room) {
+        if(room) {
+          $('#header').html(room.name);
+          $('#room-info').show();
+          $('#users').html(room.users.length);
+          getCamera();
+        } else {
+          $('#header').html('Couldn\'t find chat');
+          $('#home-btn').show();
+        }
+      });
+
+      function goToStart() {
+        window.location = '/';
+      }
+
+      function getCamera() {
+        navigator.mediaDevices.getUserMedia({video: { facingMode: 'user' }, audio: true})
+          .then(function(stream) {
+              myStream = stream;
+              streamVideo(stream, mirror);
+              mirror.play();
+              setTimeout(function() { // TODO on stream playing bla bla bla
+                $('#mirror').css('background', '#000');
+                $('#join-btn').prop('disabled', false);
+              }, 1000);
+
+            })
+          .catch(function(err) {
+            console.error(err)
+          });
+      }
+
+      function join() {
+        $('#start-screen').hide();
+        mirror.pause();
+        streamVideo(myStream, selfie);
+        $('#videos').show();
+        
+        post('/api/join', {
+          id: user_id,
+          room: room_id
+        }, function() {
+          log('Added to room');
+          createConnections();
+        });
+      }
+
+      function createConnections() {
+
+        get('/api/get?id=' + room_id, function(room) {
+          
+          // TODO check for dropped users by going through users list and compare to connections...
+
+          for(var i = 0; i < room.users.length; i++) {
+            var user = room.users[i];
+            if(user.id === user_id) {
+              continue;
+            } else {
+              connections.push(createConnection(user));
+            }
+          }
+          
+          poller = setInterval(poll, 10000);
+        });
+      }
+
+      function createConnection(reciever) {
+        
+        var peer = new SimplePeer({
+          initiator: true,
+          trickle: false,
+          stream: myStream
+        });
+
+        var video = $('<video playsinline autoplay class="video">');
+        $('#videos').append(video);
+
+        var connection = {
+          sender: user_id,
+          sender_data: null,
+          reciever: reciever.id,
+          reciever_data: null,
+          peer: peer,
+          video: video[0]
+        };
+
+        peer.on('signal', function (data) {
+          log('Has signal!!!! as initiator');
+          connection.sender_data = data;
+          post('/api/connect', {
+            sender: user_id,
+            sender_data: data,
+            reciever: reciever.id,
+            reciever_data: connection.reciever_data,
+            room: room_id
+          }, function(resp) {
+            log('Connection sent to: ' + reciever.id);
+          });
+        });
+
+        peer.on('stream', function (stream) {
+          streamVideo(stream, video[0]);
+          video[0].play();
+        });
+
+        return connection;
+      }
+
+      function poll() {
+        log('Poll!');
+        get('/api/get?id=' + room_id, function(room) {
+          
+          for(var i = 0; i < room.connections.length; i++) {
+            var connection = room.connections[i];
+            if (connection.sender === user_id && connection.reciever_data) {
+              log('I was sender');
+              for(var j = 0; j < connections.length; j++) {
+                var myConn = connections[j];
+                if (myConn.sender === connection.sender && myConn.reciever === connection.reciever &&
+                  myConn.reciever_data === null) {
+                  myConn.reciever_data = connection.reciever_data;
+                  myConn.peer.signal(connection.reciever_data);
+                }
+              }
+
+            } else if(connection.reciever === user_id && connection.reciever_data === null) {
+              log('I\'m reciever');
+              var peer = new SimplePeer({
+                initiator: false,
+                trickle: false,
+                stream: myStream
+              });
+
+              var video = $('<video playsinline autoplay class="video">');
+              $('#videos').append(video);
+
+              peer.on('signal', function (data) {
+                connection.reciever_data = data;
+                post('/api/connect', {
+                  sender: connection.sender,
+                  sender_data: connection.sender_data,
+                  reciever: connection.reciever,
+                  reciever_data: data,
+                  room: room_id
+                }, function(resp) {
+                  log('Connection sent to: ' + connection.sender);
+                });
+              });
+
+              peer.on('stream', function (stream) {
+                streamVideo(stream, video[0]);
+                video[0].play();
+              });
+
+              log('Connecting to user');
+              peer.signal(connection.sender_data);
+
+              //TODO save connection ???
+            }
+          }
+        });
+      }
+
+      window.onbeforeunload = function() {
+        console.log('Leaving');
+      };
+
+    </script>
+  </body>
+</html>
