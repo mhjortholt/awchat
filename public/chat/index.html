@@ -18,7 +18,7 @@
   		<h1 id="header"></h1>
       
       <div id="room-info" style="display: none;">  		
-        <video id="mirror" playsinline autoplay muted style="width: 400px; height: 250px; background: url('../img/noise.gif');"></video>
+        <video id="mirror" playsinline autoplay muted></video>
 
     		<p>
     			Currently there are <span id="users" style="font-weight: bold;">0</span> people in the chat
@@ -30,12 +30,7 @@
       <button id="home-btn" onclick="goToStart()" style="display: none;">Go to start</button>
   	</div>
 
-    <div id="videos">
-      <div class="video-frame">
-        <h4>You</h4>
-        <video id="selfie" playsinline autoplay muted></video>
-      </div>
-    </div>
+    <div id="videos"><div class="video-frame"><h4>You</h4><video id="selfie" class="connected" playsinline autoplay muted></video></div></div>
 
     <script src="../js/jquery.js" charset="utf-8"></script>
     <script src="../js/simple-peer.min.js" charset="utf-8"></script>
@@ -72,7 +67,6 @@
               streamVideo(stream, mirror);
 
               setTimeout(function() { // TODO on stream playing bla bla bla
-                $('#mirror').css('background', '#000');
                 $('#join-btn').prop('disabled', false);
               }, 1000);
 
@@ -95,6 +89,7 @@
           log('Added to room');
           createConnections();
         });
+        $('#home').hide();
       }
 
       function createConnections() {
@@ -111,7 +106,7 @@
             sent_connections.push(createConnection(user));
           }
           
-          poller = setInterval(poll, 5000);
+          poller = setInterval(poll, 6000);
         });
       }
 
@@ -239,13 +234,56 @@
         var video = $('<video playsinline autoplay class="video">');
         div.append(h4);
         div.append(video);
-        $('#videos').append(div);
+        $('#videos').prepend(div);
+        resize();
         return video[0];
       }
 
       window.onbeforeunload = function() {
         console.log('Leaving');
       };
+
+      function resize() {
+        let height = window.innerHeight;
+        let width = window.innerWidth;
+
+        let n = $('.video-frame').length;
+
+        $('.video-frame').removeClass('one-user');
+        $('.video-frame').removeClass('two-users');
+        $('.video-frame').removeClass('four-user');
+        $('.video-frame').removeClass('six-users');
+        $('.video-frame').removeClass('eight-user');
+        $('.video-frame').removeClass('nine-users');
+        $('.video-frame').removeClass('twelve-user');
+
+        $('.video-frame').removeClass('two-users-mobile');
+        $('.video-frame').removeClass('six-users-mobile');
+        $('.video-frame').removeClass('eight-users-mobile');
+        $('.video-frame').removeClass('twelve-users-mobile');
+
+        if(n === 1) $('.video-frame').addClass('one-user');
+        if(n === 3 || n === 4) $('.video-frame').addClass('four-users');
+        if(n === 9) $('.video-frame').addClass('nine-users');
+
+        // Landscape
+        if(width >= height) {
+          if(n === 2) $('.video-frame').addClass('two-users');
+          if(n === 5 || n === 6) $('.video-frame').addClass('six-users');
+          if(n === 7 || n === 8) $('.video-frame').addClass('eight-users');
+          if(n > 9) $('.video-frame').addClass('twelve-users');
+        } else { // Portrait
+          if(n === 2) $('.video-frame').addClass('two-users-mobile');
+          if(n === 5 || n === 6) $('.video-frame').addClass('six-users-mobile');
+          if(n === 7 || n === 8) $('.video-frame').addClass('eight-users-mobile');
+          if(n > 9) $('.video-frame').addClass('twelve-users-mobile');
+        }
+
+      }
+
+      window.onresize = resize;
+      resize();
+
 
     </script>
   </body>

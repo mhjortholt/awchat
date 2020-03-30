@@ -39,6 +39,9 @@ function streamVideo(stream, video) {
   } else {
     video.src = window.URL.createObjectURL(stream);
   }
+  setTimeout(function() {
+    $(video).addClass('connected');
+  }, 1000);
 }
 
 function uuidv4() {
@@ -56,8 +59,6 @@ if(!user_id) {
 
 
 //user_id = prompt('user id');
-
-
 
 
 
