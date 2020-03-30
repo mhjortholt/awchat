@@ -14,7 +14,7 @@ function requireHTTPS(req, res, next) {
 
 const app = express();
 
-app.use(requireHTTPS);
+if(PORT !== 5000) app.use(requireHTTPS);
 app.use(express.json());
 
 app.post('/api/create', (req, res) => {
