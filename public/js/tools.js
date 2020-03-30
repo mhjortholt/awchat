@@ -55,6 +55,8 @@ if(!user_id) {
 }
 
 
+user_id = prompt('user id');
+
 
 
 

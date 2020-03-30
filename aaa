@@ -1,3 +1,15 @@
+TODO
+- redirect from index to chat when using #
+- always use ssl
+- fix 3 party calls (use name as id for debugging?)
+- improve mobile gui
+- improve multiple chat gui
+
+
+
+
+
+
 3 party call
 https://webrtc.github.io/samples/src/content/peerconnection/multiple/
 
@@ -46,5 +58,78 @@ chat
 
 STOCK PHOTOS
 https://www.pexels.com/search/bar/
+
+
+
+PROTOCOL
+
+listOfUsers = []
+
+
+join
+get listOfUsers
+
+
+if > 0
+	for each
+		create peer
+		create video
+		on signal
+			give offer by:
+			send data, your user_id and to who
+		on stream
+			hook to video
+		bonus on connection lost
+			remove video (and offer?)
+
+
+start polling
+	for each connection
+		if reciever == user_id
+		create peer
+		set data
+		create video
+		on signal
+			post response data (but bulk)
+		on stream
+			hook to video
+		bonus on connection lost
+			remove video (and offer?)
+
+		else if sender == user_id
+			if !connection
+				add data
+
+
+room
+	users (ids)
+	connections
+		[
+			{
+				sender: {
+					id:
+					data:
+				},
+				reciever: {
+					id:
+					data: null
+				}
+			}
+		]
+
+remove user
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

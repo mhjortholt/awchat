@@ -28,6 +28,8 @@
     <script src="js/tools.js" charset="utf-8"></script>
     <script>
 
+      if (location.hash) window.location = '/chat/' + location.hash;
+
       function create() {
         let name = $('#room-name').val();
         post('/api/create', {name: name}, function(resp) {

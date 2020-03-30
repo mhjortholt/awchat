@@ -14,8 +14,8 @@ module.exports = {
 		var room = rooms[connection.room];
 		if(room) {
 			for(var i = 0; i < room.connections.length; i++) {
-				if(room.connections[i].sender_id === connection.sender_id &&
-					room.connections[i].reciever_id === connection.reciever_id) {
+				if(room.connections[i].sender === connection.sender &&
+					room.connections[i].reciever === connection.reciever) {
 					room.connections[i] = connection;
 					return;
 				}

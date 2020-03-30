@@ -48,6 +48,26 @@ input[type=text] {
 	z-index: 1000; position: absolute; left: 20px; top: 20px; font-size: 30px; cursor: pointer;
 }
 
-.video {
-	width: 400px; height: 250px; border: 1px solid red; display: inline-block;
+.video-frame {
+	width: 400px; height: 250px; border: 1px solid red; display: inline-block; background: #000; position: relative;
+	vertical-align: top;
 }
+
+.video-frame h4 {
+	position: absolute;
+	left: 5px;
+	top: 5px;
+	text-shadow: #fff 2px 2px 5px;
+}
+
+.video-frame video {
+	width: 100%;
+}
+
+
+
+
+
+
+
+
