@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <title>AW-chat</title>
 
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css?family=Baloo+2:400,700&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
@@ -36,6 +37,17 @@
           window.location = '/chat#' + resp.id;
         });
       }
+
+      let input = document.getElementById('room-name');
+      input.addEventListener('keyup', function(event) {
+        if (event.keyCode === 13) {
+          event.preventDefault();
+          create();
+        }
+      });
+
+      //$('#room-name').focus();
+
 
     </script>
   </body>

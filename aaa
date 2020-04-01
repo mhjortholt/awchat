@@ -1,25 +1,25 @@
 TODO
 X redirect from index to chat when using #
-- always use ssl
+X always use ssl
 X fix 3 party calls (use name as id for debugging?)
-- improve mobile gui
-- improve multiple chat gui
+X improve mobile gui
+X improve multiple chat gui
 X stabalize
 
-- connecting... gui
+X connecting... gui
+
 - remove when disconnected
-
-
+- controls for sound and video and hangup
 - use custom domain (aw-chat)
-- tweak design
+- mobile adapt
+- share button
+- menu
 
+- tweak design
 - party games
 - youtube window
 - spotify music box
 - chat
-- controls for sound and video
-
-center transform: translate(-50%, -50%);
 
 
 3 party call
